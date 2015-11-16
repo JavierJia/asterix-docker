@@ -12,7 +12,7 @@ arg=$2
 ccip=$3
 
 # Fourth argument is the publicly-routable IP address. Only required for NCs.
-pubip=$4
+pubip=`ifconfig eth0 2>/dev/null | awk '/inet addr:/ {print $2}'|sed 's/addr://'`
 
 # Check arguments.
 case "$type" in

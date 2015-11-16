@@ -65,7 +65,7 @@
   
   <property>
     <name>storage.memorycomponent.globalbudget</name>
-    <value>536870912</value>
+    <value>2147483648</value>
     <description>The total size of memory in bytes that the sum of all
     open memory
     components cannot exceed. (Default = "536870192" // 512MB)
@@ -164,7 +164,7 @@
   
   <property>
     <name>compiler.sortmemory</name>
-    <value>33554432</value>
+    <value>134217728</value>
     <description>The amount of memory in bytes given to sort operations.
     (Default = "33554432" // 32mb)
     </description>
@@ -172,7 +172,7 @@
   
   <property>
     <name>compiler.joinmemory</name>
-    <value>33554432</value>
+    <value>134217728</value>
     <description>The amount of memory in bytes given to join operations.
     (Default = "33554432" // 32mb)
     </description>
