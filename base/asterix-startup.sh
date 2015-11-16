@@ -11,6 +11,9 @@ arg=$2
 # Third argument is the IP of the CC. Only required for NCs.
 ccip=$3
 
+# Total number of ncs, Only required for NCs.
+ncend=$4
+
 # Fourth argument is the publicly-routable IP address. Only required for NCs.
 pubip=`ifconfig eth0 2>/dev/null | awk '/inet addr:/ {print $2}'|sed 's/addr://'`
 
@@ -30,7 +33,7 @@ case "$type" in
             echo "  <index> - the number of this NC (1, 2, ..)"
             echo "  <cc ip> - the IP address to contact the CC"
             echo "  <public ip> - the publicly-routable IP address where"
-            echo "     this NC's ports will be mapped"
+            echo "  <total ncs> - total number of NCs" 
             exit 10
         fi
         ;;
@@ -43,14 +46,6 @@ CONFFILE=asterix-configuration.xml
 add_nc_to_conf() {
     ncnum=$1
     ncid="nc$ncnum"
-
-    # nc1 is always the metadata node
-    if [ "$ncnum" = "1" ]
-    then
-        cat <<EOF >> ${CONFFILE}
-  <metadataNode>${ncid}</metadataNode>
-EOF
-    fi
 
     # NCs store all artifacts in subdirectories of /nc
     cat <<EOF >> ${CONFFILE}
@@ -71,24 +66,22 @@ EOF
 }
 
 # Write out asterix-configuration.xml header
+# nc1 is always the metadata node
 cat <<EOF > ${CONFFILE}
 <asterixConfiguration xmlns="asterixconf">
-
+  <metadataNode>nc1</metadataNode>
 EOF
 
 # Write out the appropriate set of NC entries
 case "$type" in
-    cc)
-        ncstart=1
-        ncend=$arg
-        ;;
-    nc)
-        ncstart=$arg
-        ncend=$arg
-        ;;
+   cc)
+       ncend=$arg
+       ;;
+   nc)
+       ;;
 esac
 
-for ((i=$ncstart; i<=$ncend; i++))
+for ((i=1; i<=$ncend; i++))
 do
     add_nc_to_conf $i
 done
