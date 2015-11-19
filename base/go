@@ -1,15 +1,20 @@
 #!/bin/sh
 
+set -o nounset
+
+file=$1
+tag=$2
+
 echo Unpacking asterix distribution...
 rm -rf build
 mkdir build
 cd build
-unzip -q ../asterix*server*.zip
+unzip -q ../$1
 cd ..
 cp -a asterix-startup.sh asterix-properties.xml build
 chmod -R og-w build
 
-docker build -t ceejatec/asterix-base .
+docker build -t jianfeng/asterix-base:${tag} .
 
-(cd ../cc; ./go)
-(cd ../nc; ./go)
+(cd ../cc; ./go $tag)
+(cd ../nc; ./go $tag)
