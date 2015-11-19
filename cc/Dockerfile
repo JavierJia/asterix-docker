@@ -1,7 +1,6 @@
 # Docker container for Asterix CC
 
-FROM ceejatec/asterix-base:latest
-MAINTAINER chillery@lambda.nu
+FROM jianfeng/asterix-base:ysk
 
 # Create /cc and grant ownership to asterix
 RUN mkdir /cc && chown asterix:asterix /cc

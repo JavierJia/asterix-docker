@@ -13,6 +13,10 @@ USER root
 
 ENV TERM dumb
 # Copy Asterix application.
-COPY build /asterix/
+ADD asterix-server-0.8.7-ys-SNAPSHOT-binary-assembly.zip /asterix/
+
+COPY ./asterix-startup.sh /asterix
+COPY ./asterix-properties.xml /asterix
+
 
 

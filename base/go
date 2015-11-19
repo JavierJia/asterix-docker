@@ -6,14 +6,7 @@ file=$1
 tag=$2
 
 echo Unpacking asterix distribution...
-rm -rf build
-mkdir build
-cd build
-unzip -q ../$1
-cd ..
-cp -a asterix-startup.sh asterix-properties.xml build
-chmod -R og-w build
-
+sed -i "s/ADD .* \/asterix\//ADD $1 \/asterix\//" Dockerfile
 docker build -t jianfeng/asterix-base:${tag} .
 
 (cd ../cc; ./go $tag)

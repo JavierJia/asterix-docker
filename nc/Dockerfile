@@ -1,7 +1,6 @@
 # Docker container for Asterix NC
 
-FROM ceejatec/asterix-base:latest
-MAINTAINER chillery@lambda.nu
+FROM jianfeng/asterix-base:ysk
 
 # Create /nc and grant ownership to asterix
 RUN mkdir /nc && chown asterix:asterix /nc
