@@ -1,6 +1,6 @@
 # Docker container for Asterix CC
 
-FROM jianfeng/asterix-base:ysk
+FROM jianfeng/asterix-base:master
 
 # Create /cc and grant ownership to asterix
 RUN mkdir /cc && chown asterix:asterix /cc

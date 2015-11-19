@@ -11,12 +11,16 @@ USER root
 #    echo 'asterix:asterix' | chpasswd && \
 #    sed -ri 's/ALL\) ALL/ALL) NOPASSWD:ALL/' /etc/sudoers
 
+RUN apt-get install -y unzip
+
 ENV TERM dumb
 # Copy Asterix application.
-ADD asterix-server-0.8.7-ys-SNAPSHOT-binary-assembly.zip /asterix/
+ADD asterix-server-0.8.8-SNAPSHOT-binary-assembly.zip /asterix/
 
-COPY ./asterix-startup.sh /asterix
-COPY ./asterix-properties.xml /asterix
+RUN unzip /asterix/*.zip -d /asterix/
+
+COPY ./asterix-startup.sh /asterix/
+COPY ./asterix-properties.xml /asterix/
 
 
 

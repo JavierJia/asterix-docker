@@ -1,6 +1,6 @@
 # Docker container for Asterix NC
 
-FROM jianfeng/asterix-base:ysk
+FROM jianfeng/asterix-base:master
 
 # Create /nc and grant ownership to asterix
 RUN mkdir /nc && chown asterix:asterix /nc
