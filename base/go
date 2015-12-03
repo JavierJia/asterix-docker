@@ -7,6 +7,7 @@ tag=$2
 
 echo Unpacking asterix distribution...
 sed -i "s/ADD .* \/asterix\//ADD $1 \/asterix\//" Dockerfile
+docker rmi -f jianfeng/asterix-base:${tag} 
 docker build -t jianfeng/asterix-base:${tag} .
 
 (cd ../cc; ./go $tag)
