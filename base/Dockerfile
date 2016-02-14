@@ -3,7 +3,7 @@
 # See https://github.com/ceejatec/naked-docker/ for details about the
 # construction of the base image.
 
-FROM jianfeng/asterixbuilder
+FROM centos
 USER root
 
 # Create "asterix" user with password-less sudo privs.
@@ -12,8 +12,9 @@ USER root
 #    sed -ri 's/ALL\) ALL/ALL) NOPASSWD:ALL/' /etc/sudoers
 
 RUN apt-get install -y unzip
-
+RUN yum install -y unzip java-1.8.0-openjdk openssh-server openssh-clients python-setuptools wget curl
 ENV TERM dumb
+
 # Copy Asterix application.
 ADD asterix-server-0.8.8-SNAPSHOT-binary-assembly.zip /asterix/
 
@@ -22,6 +23,7 @@ ENV LANG en_US.UTF-8
 ENV LANGUAGE en_US:en  
 ENV LC_ALL en_US.UTF-8  
 
+ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0
 RUN unzip /asterix/*.zip -d /asterix/
 
 COPY ./asterix-startup.sh /asterix/

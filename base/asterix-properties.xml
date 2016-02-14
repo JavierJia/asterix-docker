@@ -8,9 +8,9 @@
   
   <property>
     <name>storage.buffercache.pagesize</name>
-    <value>524288</value>
+    <value>131072</value>
     <description>The page size in bytes for pages in the buffer cache.
-    (Default = "524288" // 512KB)
+    (Default = "131072" // 128KB)
     </description>
   </property>
   
@@ -33,9 +33,9 @@
   
   <property>
     <name>storage.memorycomponent.pagesize</name>
-    <value>524288</value>
+    <value>131072</value>
     <description>The page size in bytes for pages allocated to memory
-    components. (Default = "524288" // 512KB)
+    components. (Default = "131072" // 512KB)
     </description>
   </property>
   
@@ -89,9 +89,9 @@
   
   <property>
     <name>txn.log.buffer.pagesize</name>
-    <value>524288</value>
+    <value>131072</value>
     <description>The size of pages in the in-memory log buffer. (Default =
-    "524288" // 512KB)
+    "131072" // 128KB)
     </description>
   </property>
   
@@ -180,7 +180,7 @@
   
   <property>
     <name>compiler.framesize</name>
-    <value>524288</value>
+    <value>131072</value>
     <description>The Hyracks frame size that the compiler configures per
     job. (Default = "131072" // 128KB)
     </description>

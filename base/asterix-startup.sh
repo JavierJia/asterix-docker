@@ -55,11 +55,11 @@ add_nc_to_conf() {
   </store>
   <coredump>
     <ncId>${ncid}</ncId>
-    <coredumpPath>/nc/coredump</coredumpPath>
+    <coredumpPath>/${ncid}/coredump</coredumpPath>
   </coredump>
   <transactionLogDir>
     <ncId>${ncid}</ncId>
-    <txnLogDirPath>/nc/txnLogs</txnLogDirPath>
+    <txnLogDirPath>/${ncid}/txnLogs</txnLogDirPath>
   </transactionLogDir>
 
 EOF
@@ -103,16 +103,17 @@ case "$type" in
         ;;
     nc)
         export JAVA_OPTS="-Djava.rmi.server.hostname=${pubip}"
+        port=$((5000+arg*10))
         exec /asterix/bin/asterixnc \
-            -node-id nc${arg} -iodevices /nc/iodevice \
+            -node-id nc${arg} -iodevices /nc${arg}/iodevice \
             -cc-host ${ccip} -cc-port 19000 \
             -cluster-net-ip-address 0.0.0.0 \
             -cluster-net-public-ip-address ${pubip} \
-            -cluster-net-port 502${arg} -cluster-net-public-port 502${arg} \
+            -cluster-net-port $((port+0)) -cluster-net-public-port $((port+0))\
             -data-ip-address 0.0.0.0 -data-public-ip-address ${pubip} \
-            -data-port 500${arg} -data-public-port 500${arg} \
+            -data-port $((port+1)) -data-public-port $((port+1)) \
             -result-ip-address 0.0.0.0 -result-public-ip-address ${pubip} \
-            -result-port 501${arg} -result-public-port 501${arg} \
-            -- -metadata-port 503${arg}
+            -result-port $((port+2)) -result-public-port $((port+2)) \
+            -- -metadata-port $((port+3))
         ;;
 esac
