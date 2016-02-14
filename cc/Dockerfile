@@ -9,4 +9,4 @@ RUN mkdir /cc && chown asterix:asterix /cc
 USER asterix
 WORKDIR /cc
 ENTRYPOINT [ "/asterix/asterix-startup.sh", "cc" ]
-EXPOSE 19000 19001 19002
+EXPOSE 19000-19010
