@@ -5,6 +5,9 @@ set -o nounset
 file=$1
 tag=$2
 
+cp $file .
+file=`basename $file`
+
 echo Unpacking asterix distribution...
 sed -i "s/ADD .* \/asterix\//ADD $1 \/asterix\//" Dockerfile
 docker rmi -f jianfeng/asterix-base:${tag} 
