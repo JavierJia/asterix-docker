@@ -11,19 +11,19 @@ USER root
 #    echo 'asterix:asterix' | chpasswd && \
 #    sed -ri 's/ALL\) ALL/ALL) NOPASSWD:ALL/' /etc/sudoers
 
+RUN echo 'LANG="en_US.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="America/Los_Angeles"' > /etc/sysconfig/clock ;cp -a /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
+RUN echo "include_only=.us" >> /etc/yum/pluginconf.d/fastestmirror.conf
 RUN yum install -y unzip java-1.8.0-openjdk openssh-server openssh-clients python-setuptools wget curl net-tools
 ENV TERM dumb
 
 # Copy Asterix application.
 ADD asterix-server-0.8.8-SNAPSHOT-binary-assembly.zip /asterix/
 
-ENV LC_CTYPE="en_US.UTF-8"
-ENV LANG en_US.UTF-8  
-ENV LANGUAGE en_US:en  
-ENV LC_ALL en_US.UTF-8  
-RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
-
-#RUN locale-gen en_US.UTF-8  
+#ENV LC_CTYPE="en_US.UTF-8"
+#ENV LANG en_US.UTF-8  
+#ENV LANGUAGE en_US:en  
+#ENV LC_ALL en_US.UTF-8  
+#RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 
 ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0
 RUN unzip /asterix/*.zip -d /asterix/
