@@ -9,7 +9,7 @@ cp $file .
 file=`basename $file`
 
 echo Unpacking asterix distribution...
-sed -i "s/ADD .* \/asterix\//ADD $1 \/asterix\//" Dockerfile
+sed -i "s/ADD .* \/asterix\//ADD $file \/asterix\//" Dockerfile
 docker rmi -f jianfeng/asterix-base:${tag} 
 docker build -t jianfeng/asterix-base:${tag} .
 
