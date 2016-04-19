@@ -97,12 +97,13 @@ EOF
 # Last but not least, execute the appropriate command
 case "$type" in
     cc)
+        export JAVA_OPTS="-Dorg.eclipse.jetty.server.Request.maxFormContentSize=-1"
         exec /asterix/bin/asterixcc \
             -cluster-net-ip-address 127.0.0.1 -cluster-net-port 19000 \
             -client-net-ip-address 127.0.0.1
         ;;
     nc)
-        export JAVA_OPTS="-Djava.rmi.server.hostname=${pubip}"
+        export JAVA_OPTS="-Djava.rmi.server.hostname=${pubip} "
         port=$((5000+arg*10))
         exec /asterix/bin/asterixnc \
             -node-id nc${arg} -iodevices /nc${arg}/iodevice \
