@@ -17,7 +17,7 @@ RUN yum install -y unzip java-1.8.0-openjdk openssh-server openssh-clients pytho
 ENV TERM dumb
 
 # Copy Asterix application.
-ADD asterix-server-0.8.8-SNAPSHOT-binary-assembly.zip /asterix/
+ADD asterix-server-0.8.9-SNAPSHOT-binary-assembly.zip /asterix/
 
 #ENV LC_CTYPE="en_US.UTF-8"
 #ENV LANG en_US.UTF-8  
@@ -26,6 +26,7 @@ ADD asterix-server-0.8.8-SNAPSHOT-binary-assembly.zip /asterix/
 #RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 
 ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0
+ENV _JAVA_OPTIONS="-Xmx4g"
 RUN unzip /asterix/*.zip -d /asterix/
 
 COPY ./asterix-startup.sh /asterix/
