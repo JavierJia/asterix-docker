@@ -14,6 +14,7 @@ ccip=$3
 # Total number of ncs, Only required for NCs.
 ncend=$4
 
+partitions=2
 # Fourth argument is the publicly-routable IP address. Only required for NCs.
 pubip=`ifconfig eth0 2>/dev/null | awk '/inet / {print $2}'`
 
@@ -106,7 +107,7 @@ case "$type" in
         export JAVA_OPTS="-Djava.rmi.server.hostname=${pubip} "
         port=$((5000+arg*10))
         exec /asterix/bin/asterixnc \
-            -node-id nc${arg} -iodevices /nc${arg}/iodevice \
+            -node-id nc${arg} -iodevices "/nc${arg}/iodevice1,/nc${arg}/iodevice2" \
             -cc-host ${ccip} -cc-port 19000 \
             -cluster-net-ip-address 0.0.0.0 \
             -cluster-net-public-ip-address ${pubip} \
