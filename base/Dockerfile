@@ -13,7 +13,22 @@ USER root
 
 RUN echo 'LANG="en_US.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="America/Los_Angeles"' > /etc/sysconfig/clock ;cp -a /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 RUN echo "include_only=.us" >> /etc/yum/pluginconf.d/fastestmirror.conf
-RUN yum install -y unzip java-1.8.0-openjdk openssh-server openssh-clients python-setuptools wget curl net-tools
+RUN yum install -y unzip openssh-server openssh-clients python-setuptools wget curl net-tools
+RUN yum remove -y java-1.6.0-openjdk
+RUN wget --no-cookies \
+    --no-check-certificate \
+    --header "Cookie: oraclelicense=accept-securebackup-cookie" \
+    "http://download.oracle.com/otn-pub/java/jdk/8-b132/jdk-8-linux-x64.rpm" \
+    -O jdk-8-linux-x64.rpm
+RUN rpm -Uvh jdk-8-linux-x64.rpm
+RUN alternatives --install /usr/bin/java java /usr/java/jdk1.8.0/jre/bin/java 20000
+RUN alternatives --install /usr/bin/jar jar /usr/java/jdk1.8.0/bin/jar 20000
+RUN alternatives --install /usr/bin/javac javac /usr/java/jdk1.8.0/bin/javac 20000
+RUN alternatives --install /usr/bin/javaws javaws /usr/java/jdk1.8.0/jre/bin/javaws 20000
+RUN alternatives --set java /usr/java/jdk1.8.0/jre/bin/java
+RUN alternatives --set javaws /usr/java/jdk1.8.0/jre/bin/javaws
+RUN alternatives --set javac /usr/java/jdk1.8.0/bin/javac
+RUN alternatives --set jar /usr/java/jdk1.8.0/bin/jar
 ENV TERM dumb
 
 # Copy Asterix application.
@@ -25,8 +40,9 @@ ADD asterix-server-0.8.9-SNAPSHOT-binary-assembly.zip /asterix/
 #ENV LC_ALL en_US.UTF-8  
 #RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 
-ENV JAVA_HOME /usr/lib/jvm/jre-1.8.0
+ENV JAVA_HOME /usr/java/jdk1.8.0
 ENV _JAVA_OPTIONS="-Xmx4g"
+ENV PATH="$PATH:$JAVA_HOME/bin"
 RUN unzip /asterix/*.zip -d /asterix/
 
 COPY ./asterix-startup.sh /asterix/
