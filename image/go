@@ -3,15 +3,14 @@
 set -o nounset
 
 file=$1
-tag=$2
 
 cp $file .
 file=`basename $file`
 
 echo Unpacking asterix distribution...
 sed -i "s/ADD .* \/asterix\//ADD $file \/asterix\//" Dockerfile
-docker rmi -f jianfeng/asterix-base:${tag} 
-docker build -t jianfeng/asterix-base:${tag} .
+docker rmi -f jianfeng/asterixdb 
+docker build --rm -t jianfeng/asterixdb .
 
-(cd ../cc; ./go $tag)
-(cd ../nc; ./go $tag)
+[ "$1" == "$file" ] || { \rm -f $file ;}
+

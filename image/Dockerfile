@@ -41,12 +41,16 @@ ADD asterix-server-0.8.9-SNAPSHOT-binary-assembly.zip /asterix/
 #RUN localedef -c -i en_US -f UTF-8 en_US.UTF-8
 
 ENV JAVA_HOME /usr/java/jdk1.8.0
-ENV _JAVA_OPTIONS="-Xmx4g"
 ENV PATH="$PATH:$JAVA_HOME/bin"
 RUN unzip /asterix/*.zip -d /asterix/
 
-COPY ./asterix-startup.sh /asterix/
-COPY ./asterix-properties.xml /asterix/
+ADD ./asterix-startup.sh /asterix/
 
+WORKDIR /home/asterix
+
+ENTRYPOINT ["/asterix/asterix-startup.sh"]
+
+EXPOSE 19000-19010
+EXPOSE 5000-8000
 
 

@@ -3,12 +3,12 @@
 #
 #          FILE: docker_run.sh
 #
-#         USAGE: ./docker_run.sh tag ncs
+#         USAGE: ./docker_run.sh ncs
 #
 #   DESCRIPTION: Run Asterix Docker containers
 #
-#       OPTIONS:    tag: master or specific versions, default is master
-#                   ncs: number of nc. default is 2
+#       OPTIONS:    
+#                   ncs: number of nc. 
 #  REQUIREMENTS: ---
 #          BUGS: ---
 #         NOTES: ---
@@ -20,18 +20,18 @@
 
 set -o nounset                              # Treat unset variables as an error
 
-tag="$1"
-ncs=$2
+ncs=$1
 
 echo "build the new container"
-docker run -d --name=cc-${tag} \
-   -p 19000:19000 -p 19001:19001 -p 19002:19002 \
-    jianfeng/asterix-cc:${tag} $ncs
+docker run -d -v $HOME/tmp:/db --name=cc \
+   -p 19000:19000 -p 19001:19001 -p 19002:19002 -p 19006:19006 -p 8888:8888 \
+    jianfeng/asterixdb cc $ncs
 
-ccip=`docker inspect cc-${tag} | grep IPAddress | grep -o '[0-9.]*' | head -1`
+ccip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cc `
+
 
 sleep 2s
-work_dir="$HOME/.asterix"
+work_dir="$HOME/tmp/asterix"
 mkdir -p $work_dir
 
 #myhost=`hostname -I | cut -d' ' -f1`
@@ -40,11 +40,9 @@ do
     ncdir=$work_dir/nc${n}
     port=$((10000+n))
     mkdir -p $ncdir
-    docker run -v $HOME/data:/data -v /home/xiz:/xiz -v $ncdir:/nc${n} -p $port:$port -d \
-      --name "nc-${tag}-${n}" \
-        jianfeng/asterix-nc:${tag} ${n} $ccip ${ncs}
+    docker run -d -v $ncdir:/db -p $port:$port  \
+      --name "nc${n}" \
+        jianfeng/asterixdb nc ${n} $ccip $ncs
 done
-
-./log.sh $tag $ncs
 
 

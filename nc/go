@@ -1,9 +1,0 @@
-#!/bin/sh -xe
-
-set -o nounset 
-
-tag=$1
-sed -i "s/jianfeng\/asterix-base:.*/jianfeng\/asterix-base:${tag}/" Dockerfile
-docker build -t jianfeng/asterix-nc:${tag} .
-
-

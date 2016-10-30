@@ -1,20 +1,104 @@
+#!/bin/bash
+# Intended to be the ENTRYPOINT of a Docker AsterixDB cluster image
 
-<property>
-    <name>nc.java.opts</name>
-    <value>-Xmx3096m</value>
-    <description>JVM parameters for each Node Contoller (NC)</description>
-</property>
+# First argument is either "nc" or "cc", and comes from the Dockerfile itself
+type=$1
 
-<property>
-    <name>cc.java.opts</name>
-    <value>-Xmx1024m</value>
-    <description>JVM parameters for each Cluster Contoller (CC)
-    </description>
-</property>
+# Second argument is numeric, either the number of NCs (for "cc") or the
+# number of the NC to start (for "nc"). It is required.
+arg=$2
 
+# Third argument is the IP of the CC. Only required for NCs.
+ccip=$3
+
+# Total number of ncs, Only required for NCs.
+ncend=$4
+
+VOLUMN="/db"
+CC_JVM_MEM=${CC_JVM_MEM:-1024} # in mega bytes
+NC_JVM_MEM=${NC_JVM_MEM:-4096} # in mega bytes
+PAGE_SIZE=${PAGE_SIZE:-131072} #in bytes
+
+# Fourth argument is the publicly-routable IP address. 
+pubip=`ifconfig eth0 2>/dev/null | awk '/inet / {print $2}'`
+echo $pubip
+
+function add_nc_to_conf() {
+    ncnum=$1
+    ncid="nc$ncnum"
+
+    # NCs store all artifacts in subdirectories of /nc
+    cat <<-EOF >> ${CONFFILE}
+    <store>
+    <ncId>${ncid}</ncId>
+    <storeDirs>${VOLUMN}/io/storage</storeDirs>
+    </store>
+    <coredump>
+    <ncId>${ncid}</ncId>
+    <coredumpPath>${VOLUMN}/coredump</coredumpPath>
+    </coredump>
+    <transactionLogDir>
+    <ncId>${ncid}</ncId>
+    <txnLogDirPath>${VOLUMN}/txnLogs</txnLogDirPath>
+    </transactionLogDir>
+EOF
+}
+
+# Check arguments.
+case "$type" in
+    cc)
+        if [ -z "$arg" ]
+        then
+            echo "Please provide the number of NCs as an argument."
+            exit 10
+        fi
+        ;;
+    nc)
+        if [ -z "$arg" -o -z "$ccip" -o -z "$pubip" -o -z "$ncend" ]
+        then
+            echo "Args: index: $arg"
+            echo "      ccip : $ccip"
+            echo "      pubip: $pubip"
+            echo "      ncend: $ncend"
+            echo "Usage: asterix-nc <index> <cc ip> <total ncs>"
+            echo "  <index> - the number of this NC (1, 2, ..)"
+            echo "  <cc ip> - the IP address to contact the CC"
+            echo "  <total ncs> - total number of NCs" 
+            exit 10
+        fi
+        ;;
+esac
+
+# Configuration file to be constructed
+CONFFILE=asterix-configuration.xml
+
+# Write out asterix-configuration.xml header
+# nc1 is always the metadata node
+cat <<EOF > ${CONFFILE}
+<asterixConfiguration xmlns="asterixconf">
+<metadataNode>nc1</metadataNode>
+EOF
+
+# Write out the appropriate set of NC entries
+case "$type" in
+    cc)
+        ncend=$arg
+        ;;
+    nc)
+        ;;
+esac
+
+for((i=1; i<=$ncend; i++));do
+    add_nc_to_conf $i
+done
+
+
+ONE_THIRD=$((NC_JVM_MEM*1024*1024/3/PAGE_SIZE*PAGE_SIZE))
+CMP_SIZE=$((ONE_THIRD/PAGE_SIZE/2))
+cat <<EOF >> ${CONFFILE}
 <property>
     <name>max.wait.active.cluster</name>
-    <value>60</value>
+    <value>600</value>
     <description>Maximum wait (in seconds) for a cluster to be ACTIVE (all nodes are available)
         before a submitted query/statement can be executed. (Default = 60 seconds)
     </description>
@@ -22,7 +106,7 @@
 
 <property>
     <name>storage.buffercache.pagesize</name>
-    <value>131072</value>
+    <value>${PAGE_SIZE}</value>
     <description>The page size in bytes for pages in the buffer cache.
         (Default = "131072" // 128KB)
     </description>
@@ -30,7 +114,7 @@
 
 <property>
     <name>storage.buffercache.size</name>
-    <value>2147483648</value>
+    <value>${ONE_THIRD}</value>
     <description>The size of memory allocated to the disk buffer cache.
         The value should be a multiple of the buffer cache page size(Default
         = "536870912" // 512MB)
@@ -47,7 +131,7 @@
 
 <property>
     <name>storage.memorycomponent.pagesize</name>
-    <value>131072</value>
+    <value>${PAGE_SIZE}</value>
     <description>The page size in bytes for pages allocated to memory
         components. (Default = "131072" // 512KB)
     </description>
@@ -55,7 +139,7 @@
 
 <property>
     <name>storage.memorycomponent.numpages</name>
-    <value>32</value>
+    <value>${CMP_SIZE}</value>
     <description>The number of pages to allocate for a memory component.
         (Default = 256)
     </description>
@@ -79,7 +163,7 @@
 
 <property>
     <name>storage.memorycomponent.globalbudget</name>
-    <value>3221225472</value>
+    <value>${ONE_THIRD}</value>
     <description>The total size of memory in bytes that the sum of all
         open memory
         components cannot exceed. (Default = "536870192" // 512MB)
@@ -103,7 +187,7 @@
 
 <property>
     <name>txn.log.buffer.pagesize</name>
-    <value>131072</value>
+    <value>${PAGE_SIZE}</value>
     <description>The size of pages in the in-memory log buffer. (Default =
         "131072" // 128KB)
     </description>
@@ -177,6 +261,14 @@
 </property>
 
 <property>
+    <name>txn.job.recovery.memorysize</name>
+    <value>64MB</value>
+    <description>The memory allocated per job during recovery.
+     (Default = "67108864" // 64MB)
+    </description>
+</property>
+
+<property>
     <name>compiler.sortmemory</name>
     <value>134217728</value>
     <description>The amount of memory in bytes given to sort operations.
@@ -194,7 +286,7 @@
 
 <property>
     <name>compiler.framesize</name>
-    <value>131072</value>
+    <value>${PAGE_SIZE}</value>
     <description>The Hyracks frame size that the compiler configures per
         job. (Default = "131072" // 128KB)
     </description>
@@ -215,6 +307,13 @@
 </property>
 
 <property>
+    <name>web.queryinterface.port</name>
+    <value>19006</value>
+    <description>The port for the ASTERIX web query interface. (Default = 19006)
+    </description>
+ </property>
+
+<property>
     <name>log.level</name>
     <value>INFO</value>
     <description>The minimum log level to be displayed. (Default = INFO)
@@ -227,3 +326,32 @@
     <description>Enabling plot of Algebricks plan to tmp folder. (Default = false)
     </description>
 </property>
+
+</asterixConfiguration>
+EOF
+
+# Last but not least, execute the appropriate command
+case "$type" in
+    cc) #-Xmx${CC_JVM_MEM}m
+        export JAVA_OPTS="-Dorg.eclipse.jetty.server.Request.maxFormContentSize=-1"
+        exec /asterix/bin/asterixcc \
+            -cluster-net-ip-address ${pubip} -cluster-net-port 19000 \
+            -client-net-ip-address ${pubip} | tee > ${VOLUMN}/cc.log
+        ;;
+    nc) #-Xmx${NC_JVM_MEM}m
+        export JAVA_OPTS="-Djava.rmi.server.hostname=${pubip}"
+        port=$((5000+arg*10))
+        exec /asterix/bin/asterixnc \
+            -node-id nc${arg} -iodevices "${VOLUMN}/io" \
+            -cc-host ${ccip} -cc-port 19000 \
+            -cluster-net-ip-address ${pubip} \
+            -cluster-net-public-ip-address ${pubip} \
+            -cluster-net-port $((port+0)) -cluster-net-public-port $((port+0))\
+            -data-ip-address ${pubip} -data-public-ip-address ${pubip} \
+            -data-port $((port+1)) -data-public-port $((port+1)) \
+            -result-ip-address ${pubip} -result-public-ip-address ${pubip} \
+            -result-port $((port+2)) -result-public-port $((port+2)) | tee > ${VOLUMN}/nc${arg}.log
+        ;;
+esac
+
+
