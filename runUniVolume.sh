@@ -22,25 +22,24 @@ set -o nounset                              # Treat unset variables as an error
 
 ncs=$1
 
-echo "build the new container"
-docker run -d -v $HOME/tmp:/db --name=cc \
-   -p 19000:19000 -p 19001:19001 -p 19002:19002 -p 19006:19006 -p 8888:8888 \
+docName=dbstore
+#docker create -v $HOME/tmp/db:/db --name $docName centos /bin/true
+docker volume create --driver local --name $docName
+
+echo "build the cc"
+docker run -d --name=cc \
+   -p 19000:19000 -p 19001:19001 -p 19002:19002 -p 19006:19006 \
     jianfeng/asterixdb cc $ncs
 
 ccip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' cc `
 
-
 sleep 2s
-work_dir="$HOME/tmp/asterix"
-mkdir -p $work_dir
 
-#myhost=`hostname -I | cut -d' ' -f1`
 for ((n=1; $n <= $ncs; n=$n+1 ))
 do
-    ncdir=$work_dir/nc${n}
+    echo "build nc${n}"
     port=$((10000+n))
-    mkdir -p $ncdir
-    docker run -d -v $ncdir:/db -p $port:$port  \
+    docker run -d -v $docName:/db -p $port:$port  \
       --name "nc${n}" \
         jianfeng/asterixdb nc ${n} $ccip $ncs
 done

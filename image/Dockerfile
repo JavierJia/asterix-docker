@@ -50,7 +50,11 @@ WORKDIR /home/asterix
 
 ENTRYPOINT ["/asterix/asterix-startup.sh"]
 
+#For CC
 EXPOSE 19000-19010
-EXPOSE 5000-8000
 
+#For NC
+EXPOSE 5000-8000
+#For NC's feed
+EXPOSE 10000-11000
 

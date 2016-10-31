@@ -31,15 +31,15 @@ function add_nc_to_conf() {
     cat <<-EOF >> ${CONFFILE}
     <store>
     <ncId>${ncid}</ncId>
-    <storeDirs>${VOLUMN}/io/storage</storeDirs>
+    <storeDirs>${VOLUMN}/${ncid}/io/storage</storeDirs>
     </store>
     <coredump>
     <ncId>${ncid}</ncId>
-    <coredumpPath>${VOLUMN}/coredump</coredumpPath>
+    <coredumpPath>${VOLUMN}/${ncid}/coredump</coredumpPath>
     </coredump>
     <transactionLogDir>
     <ncId>${ncid}</ncId>
-    <txnLogDirPath>${VOLUMN}/txnLogs</txnLogDirPath>
+    <txnLogDirPath>${VOLUMN}/${ncid}/txnLogs</txnLogDirPath>
     </transactionLogDir>
 EOF
 }
@@ -94,7 +94,7 @@ done
 
 
 ONE_THIRD=$((NC_JVM_MEM*1024*1024/3/PAGE_SIZE*PAGE_SIZE))
-CMP_SIZE=$((ONE_THIRD/PAGE_SIZE/2))
+CMP_SIZE=$((ONE_THIRD/PAGE_SIZE/50)) # should enable 50 datasets
 cat <<EOF >> ${CONFFILE}
 <property>
     <name>max.wait.active.cluster</name>
@@ -332,17 +332,17 @@ EOF
 
 # Last but not least, execute the appropriate command
 case "$type" in
-    cc) #-Xmx${CC_JVM_MEM}m
-        export JAVA_OPTS="-Dorg.eclipse.jetty.server.Request.maxFormContentSize=-1"
+    cc) #
+        export JAVA_OPTS="-Xmx${CC_JVM_MEM}m -Dorg.eclipse.jetty.server.Request.maxFormContentSize=-1"
         exec /asterix/bin/asterixcc \
             -cluster-net-ip-address ${pubip} -cluster-net-port 19000 \
-            -client-net-ip-address ${pubip} | tee > ${VOLUMN}/cc.log
+            -client-net-ip-address ${pubip} 
         ;;
-    nc) #-Xmx${NC_JVM_MEM}m
-        export JAVA_OPTS="-Djava.rmi.server.hostname=${pubip}"
+    nc) #
+        export JAVA_OPTS="-Xmx${NC_JVM_MEM}m -Djava.rmi.server.hostname=${pubip}"
         port=$((5000+arg*10))
         exec /asterix/bin/asterixnc \
-            -node-id nc${arg} -iodevices "${VOLUMN}/io" \
+            -node-id nc${arg} -iodevices "${VOLUMN}/nc${arg}/io" \
             -cc-host ${ccip} -cc-port 19000 \
             -cluster-net-ip-address ${pubip} \
             -cluster-net-public-ip-address ${pubip} \
@@ -350,7 +350,7 @@ case "$type" in
             -data-ip-address ${pubip} -data-public-ip-address ${pubip} \
             -data-port $((port+1)) -data-public-port $((port+1)) \
             -result-ip-address ${pubip} -result-public-ip-address ${pubip} \
-            -result-port $((port+2)) -result-public-port $((port+2)) | tee > ${VOLUMN}/nc${arg}.log
+            -result-port $((port+2)) -result-public-port $((port+2)) > ${VOLUMN}/nc${arg}.log 2>&1
         ;;
 esac
 
