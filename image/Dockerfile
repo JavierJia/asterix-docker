@@ -10,6 +10,7 @@ USER root
 #RUN useradd asterix -G sudo -m -s /bin/bash && \
 #    echo 'asterix:asterix' | chpasswd && \
 #    sed -ri 's/ALL\) ALL/ALL) NOPASSWD:ALL/' /etc/sudoers
+ENV ADB_VERSION="0.8.9-SNAPSHOT"
 
 RUN echo 'LANG="en_US.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="America/Los_Angeles"' > /etc/sysconfig/clock ;cp -a /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 RUN echo "include_only=.us" >> /etc/yum/pluginconf.d/fastestmirror.conf
@@ -32,8 +33,7 @@ RUN alternatives --set jar /usr/java/jdk1.8.0/bin/jar
 ENV TERM dumb
 
 # Copy Asterix application.
-ADD asterix-server-0.8.9-SNAPSHOT-binary-assembly.zip /asterix/
-
+RUN wget -P /asterix/ https://asterix-jenkins.ics.uci.edu/job/asterix-integration-tests/lastSuccessfulBuild/org.apache.asterix\$asterix-server/artifact/org.apache.asterix/asterix-server/${ADB_VERSION}/asterix-server-${ADB_VERSION}-binary-assembly.zip 
 #ENV LC_CTYPE="en_US.UTF-8"
 #ENV LANG en_US.UTF-8  
 #ENV LANGUAGE en_US:en  
