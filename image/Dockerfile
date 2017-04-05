@@ -10,7 +10,7 @@ USER root
 #RUN useradd asterix -G sudo -m -s /bin/bash && \
 #    echo 'asterix:asterix' | chpasswd && \
 #    sed -ri 's/ALL\) ALL/ALL) NOPASSWD:ALL/' /etc/sudoers
-ENV ADB_VERSION="0.8.9-SNAPSHOT"
+ENV ADB_VERSION="0.9.1-SNAPSHOT"
 
 RUN echo 'LANG="en_US.UTF-8"' > /etc/sysconfig/i18n ;echo 'ZONE="America/Los_Angeles"' > /etc/sysconfig/clock ;cp -a /usr/share/zoneinfo/America/Los_Angeles /etc/localtime
 RUN echo "include_only=.us" >> /etc/yum/pluginconf.d/fastestmirror.conf

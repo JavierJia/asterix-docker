@@ -270,15 +270,23 @@ cat <<EOF >> ${CONFFILE}
 
 <property>
     <name>compiler.sortmemory</name>
-    <value>134217728</value>
+    <value>8388608</value>
     <description>The amount of memory in bytes given to sort operations.
         (Default = "33554432" // 32mb)
     </description>
 </property>
 
 <property>
+    <name>compiler.groupmemory</name>
+    <value>8388608</value>
+    <description>The amount of memory in bytes given to groupby operations.
+        (Default = "33554432" // 32mb)
+    </description>
+</property>
+
+<property>
     <name>compiler.joinmemory</name>
-    <value>134217728</value>
+    <value>8388608</value>
     <description>The amount of memory in bytes given to join operations.
         (Default = "33554432" // 32mb)
     </description>
@@ -335,22 +343,17 @@ case "$type" in
     cc) #
         export JAVA_OPTS="-Xmx${CC_JVM_MEM}m -Dorg.eclipse.jetty.server.Request.maxFormContentSize=-1"
         exec /asterix/bin/asterixcc \
-            -cluster-net-ip-address ${pubip} -cluster-net-port 19000 \
-            -client-net-ip-address ${pubip} 
+            -address ${pubip} -cluster-listen-port 19000 
         ;;
     nc) #
         export JAVA_OPTS="-Xmx${NC_JVM_MEM}m -Djava.rmi.server.hostname=${pubip}"
         port=$((5000+arg*10))
         exec /asterix/bin/asterixnc \
-            -node-id nc${arg} -iodevices "${VOLUMN}/nc${arg}/io" \
-            -cc-host ${ccip} -cc-port 19000 \
-            -cluster-net-ip-address ${pubip} \
-            -cluster-net-public-ip-address ${pubip} \
-            -cluster-net-port $((port+0)) -cluster-net-public-port $((port+0))\
-            -data-ip-address ${pubip} -data-public-ip-address ${pubip} \
-            -data-port $((port+1)) -data-public-port $((port+1)) \
-            -result-ip-address ${pubip} -result-public-ip-address ${pubip} \
-            -result-port $((port+2)) -result-public-port $((port+2)) > ${VOLUMN}/nc${arg}.log 2>&1
+            -node-id nc${arg} -address ${pubip} -iodevices "${VOLUMN}/nc${arg}/io" \
+            -cluster-address ${ccip} -cluster-port 19000 \
+            -cluster-listen-port $((port+0)) \
+            -data-listen-port $((port+1)) \
+            -result-listen-port $((port+2)) > ${VOLUMN}/nc${arg}.log 2>&1
         ;;
 esac
 
