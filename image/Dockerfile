@@ -33,7 +33,8 @@ RUN alternatives --set jar /usr/java/jdk1.8.0/bin/jar
 ENV TERM dumb
 
 # Copy Asterix application.
-RUN wget -P /asterix/ https://asterix-jenkins.ics.uci.edu/job/asterix-integration-tests/lastSuccessfulBuild/org.apache.asterix\$asterix-server/artifact/org.apache.asterix/asterix-server/${ADB_VERSION}/asterix-server-${ADB_VERSION}-binary-assembly.zip   
+#RUN wget -P /asterix/ https://asterix-jenkins.ics.uci.edu/job/asterix-integration-tests/lastSuccessfulBuild/org.apache.asterix\$asterix-server/artifact/org.apache.asterix/asterix-server/${ADB_VERSION}/asterix-server-${ADB_VERSION}-binary-assembly.zip   
+COPY ./asterix-server-0.9.2-SNAPSHOT-binary-assembly.zip /asterix/
 #ENV LC_CTYPE="en_US.UTF-8"
 #ENV LANG en_US.UTF-8  
 #ENV LANGUAGE en_US:en  
